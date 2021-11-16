@@ -1,0 +1,7 @@
+target
+.idea
+*.iml
+output
+.vscode
+output.xml
+logfile.log
