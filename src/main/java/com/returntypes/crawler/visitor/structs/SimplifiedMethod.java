@@ -13,10 +13,12 @@ public class SimplifiedMethod implements TypeParameterContainer, AnnotationsCont
     boolean chainMethodState;
     Range methodNameRange;
     Range returnTypeRange;
+    List<SimplifiedParameter> parameters;
 
     public SimplifiedMethod() {
         annotations = new LinkedList<String>();
         typeParameters = new LinkedList<SimplifiedTypeParameter>();
+        parameters = new LinkedList<SimplifiedParameter>();
     }
 
     public void setMethodName(String methodName) {
@@ -73,5 +75,13 @@ public class SimplifiedMethod implements TypeParameterContainer, AnnotationsCont
 
     public Range getReturnTypeRange() {
         return returnTypeRange;
+    }
+
+    public void addParameter(SimplifiedParameter parameter) {
+        parameters.add(parameter);
+    }
+
+    public List<SimplifiedParameter> getParameters() {
+        return parameters;
     }
 }

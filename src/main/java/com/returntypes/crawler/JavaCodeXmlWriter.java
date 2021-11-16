@@ -1,6 +1,7 @@
 package com.returntypes.crawler;
 
 import java.io.OutputStream;
+import java.util.List;
 
 import javax.xml.stream.XMLOutputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -14,6 +15,7 @@ import com.returntypes.crawler.visitor.structs.JavaCodeFile;
 import com.returntypes.crawler.visitor.structs.SimplifiedClass;
 import com.returntypes.crawler.visitor.structs.SimplifiedImport;
 import com.returntypes.crawler.visitor.structs.SimplifiedMethod;
+import com.returntypes.crawler.visitor.structs.SimplifiedParameter;
 import com.returntypes.crawler.visitor.structs.SimplifiedType;
 import com.returntypes.crawler.visitor.structs.SimplifiedTypeParameter;
 import com.returntypes.crawler.visitor.structs.TypeParameterContainer;
@@ -236,6 +238,7 @@ public class JavaCodeXmlWriter {
         writeAnnotations(simplifiedMethod);
         writeTypeParameters(simplifiedMethod);
         writeType(simplifiedMethod.getReturnType());
+        writeParameters(simplifiedMethod.getParameters());
 
         outputStreamWriter.writeEndElement();
     }
@@ -291,6 +294,34 @@ public class JavaCodeXmlWriter {
     private void writeAnnotation(String annotation) throws XMLStreamException {
         outputStreamWriter.writeStartElement("annotation");
         outputStreamWriter.writeCharacters(annotation);
+        outputStreamWriter.writeEndElement();
+    }
+
+    private void writeParameters(List<SimplifiedParameter> parameters) throws XMLStreamException {
+        if (parameters.isEmpty()) {
+            return;
+        }
+
+        outputStreamWriter.writeStartElement("parameters");
+
+        for (SimplifiedParameter parameter : parameters) {
+            writeParameter(parameter);
+        }
+
+        outputStreamWriter.writeEndElement();
+    }
+
+    private void writeParameter(SimplifiedParameter parameter) throws XMLStreamException {
+        outputStreamWriter.writeStartElement("parameter");
+        
+        outputStreamWriter.writeStartElement("name");
+        outputStreamWriter.writeCharacters(parameter.getName());
+        outputStreamWriter.writeEndElement();
+
+        outputStreamWriter.writeStartElement("type");
+        writeType(parameter.getType());
+        outputStreamWriter.writeEndElement();
+
         outputStreamWriter.writeEndElement();
     }
 }

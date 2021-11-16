@@ -10,6 +10,7 @@ import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.EnumDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ReturnStmt;
@@ -21,6 +22,7 @@ import com.returntypes.crawler.visitor.structs.JavaCodeFile;
 import com.returntypes.crawler.visitor.structs.SimplifiedClass;
 import com.returntypes.crawler.visitor.structs.SimplifiedImport;
 import com.returntypes.crawler.visitor.structs.SimplifiedMethod;
+import com.returntypes.crawler.visitor.structs.SimplifiedParameter;
 import com.returntypes.crawler.visitor.structs.SimplifiedType;
 import com.returntypes.crawler.visitor.structs.SimplifiedTypeParameter;
 
@@ -81,6 +83,9 @@ public class CodeAbstractionVisitor extends GenericVisitorAdapter<JavaCodeFile, 
         SimplifiedMethod simplifiedMethod = new SimplifiedMethod();
 
         simplifiedMethod.setMethodName(methodDeclaration.getNameAsString());
+        methodDeclaration.getParameters().forEach(parameter -> {
+            simplifiedMethod.addParameter(createSimplifiedParameter(parameter));
+        });
 
         SimplifiedType simplifiedReturnType = createSimplifiedType(methodDeclaration.getType());
         simplifiedMethod.setReturnType(simplifiedReturnType);
@@ -98,6 +103,13 @@ public class CodeAbstractionVisitor extends GenericVisitorAdapter<JavaCodeFile, 
 
         simplifiedMethod.setChainMethod(isChainMethod(methodDeclaration));
         return simplifiedMethod;
+    }
+
+    private SimplifiedParameter createSimplifiedParameter(Parameter parameter) {
+        SimplifiedParameter simplifiedParameter = new SimplifiedParameter();
+        simplifiedParameter.setName(parameter.getNameAsString());
+        simplifiedParameter.setType(createSimplifiedType(parameter.getType()));
+        return simplifiedParameter;
     }
 
     private SimplifiedType createSimplifiedType(Type type) {
