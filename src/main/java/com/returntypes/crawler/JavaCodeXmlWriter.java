@@ -314,9 +314,7 @@ public class JavaCodeXmlWriter {
     private void writeParameter(SimplifiedParameter parameter) throws XMLStreamException {
         outputStreamWriter.writeStartElement("parameter");
         
-        outputStreamWriter.writeStartElement("name");
-        outputStreamWriter.writeCharacters(parameter.getName());
-        outputStreamWriter.writeEndElement();
+        outputStreamWriter.writeAttribute("name", parameter.getName());
 
         outputStreamWriter.writeStartElement("type");
         writeType(parameter.getType());
