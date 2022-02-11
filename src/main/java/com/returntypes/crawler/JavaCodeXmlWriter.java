@@ -239,6 +239,8 @@ public class JavaCodeXmlWriter {
         writeTypeParameters(simplifiedMethod);
         writeType(simplifiedMethod.getReturnType());
         writeParameters(simplifiedMethod.getParameters());
+        writeModifiers(simplifiedMethod.getModifiers());
+        writeExceptions(simplifiedMethod.getExceptions());
 
         outputStreamWriter.writeEndElement();
     }
@@ -317,6 +319,50 @@ public class JavaCodeXmlWriter {
         outputStreamWriter.writeAttribute("name", parameter.getName());
 
         writeType(parameter.getType());
+
+        outputStreamWriter.writeEndElement();
+    }
+
+    private void writeModifiers(List<String> modifiers) throws XMLStreamException {
+        if (modifiers.isEmpty()) {
+            return;
+        }
+
+        outputStreamWriter.writeStartElement("modifiers");
+
+        for (String modifier : modifiers) {
+            writeModifier(modifier);
+        }
+
+        outputStreamWriter.writeEndElement();
+    }
+
+    private void writeModifier(String modifier) throws XMLStreamException {
+        outputStreamWriter.writeStartElement("modifier");
+
+        outputStreamWriter.writeCharacters(modifier);
+
+        outputStreamWriter.writeEndElement();
+    }
+
+    private void writeExceptions(List<SimplifiedType> exceptions) throws XMLStreamException {
+        if (exceptions.isEmpty()) {
+            return;
+        }
+
+        outputStreamWriter.writeStartElement("exceptions");
+
+        for (SimplifiedType exception : exceptions) {
+            writeException(exception);
+        }
+
+        outputStreamWriter.writeEndElement();
+    }
+
+    private void writeException(SimplifiedType exception) throws XMLStreamException {
+        outputStreamWriter.writeStartElement("exception");
+
+        outputStreamWriter.writeCharacters(exception.getName());
 
         outputStreamWriter.writeEndElement();
     }

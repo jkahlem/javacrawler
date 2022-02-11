@@ -83,8 +83,17 @@ public class CodeAbstractionVisitor extends GenericVisitorAdapter<JavaCodeFile, 
         SimplifiedMethod simplifiedMethod = new SimplifiedMethod();
 
         simplifiedMethod.setMethodName(methodDeclaration.getNameAsString());
+
+        methodDeclaration.getModifiers().forEach(modifier -> {
+            simplifiedMethod.addModifier(modifier.toString());
+        });
+
         methodDeclaration.getParameters().forEach(parameter -> {
             simplifiedMethod.addParameter(createSimplifiedParameter(parameter));
+        });
+
+        methodDeclaration.getThrownExceptions().forEach(exception -> {
+            simplifiedMethod.addException(createSimplifiedType(exception));
         });
 
         SimplifiedType simplifiedReturnType = createSimplifiedType(methodDeclaration.getType());

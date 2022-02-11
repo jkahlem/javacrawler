@@ -14,11 +14,15 @@ public class SimplifiedMethod implements TypeParameterContainer, AnnotationsCont
     Range methodNameRange;
     Range returnTypeRange;
     List<SimplifiedParameter> parameters;
+    List<String> modifiers;
+    List<SimplifiedType> exceptions;
 
     public SimplifiedMethod() {
         annotations = new LinkedList<String>();
         typeParameters = new LinkedList<SimplifiedTypeParameter>();
         parameters = new LinkedList<SimplifiedParameter>();
+        modifiers = new LinkedList<>();
+        exceptions = new LinkedList<>();
     }
 
     public void setMethodName(String methodName) {
@@ -83,5 +87,21 @@ public class SimplifiedMethod implements TypeParameterContainer, AnnotationsCont
 
     public List<SimplifiedParameter> getParameters() {
         return parameters;
+    }
+
+    public void addModifier(String modifier) {
+        modifiers.add(modifier.trim());
+    }
+
+    public List<String> getModifiers() {
+        return modifiers;
+    }
+
+    public void addException(SimplifiedType exception) {
+        exceptions.add(exception);
+    }
+
+    public List<SimplifiedType> getExceptions() {
+        return exceptions;
     }
 }
