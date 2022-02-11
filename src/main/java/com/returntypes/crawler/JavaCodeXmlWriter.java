@@ -316,9 +316,7 @@ public class JavaCodeXmlWriter {
         
         outputStreamWriter.writeAttribute("name", parameter.getName());
 
-        outputStreamWriter.writeStartElement("type");
         writeType(parameter.getType());
-        outputStreamWriter.writeEndElement();
 
         outputStreamWriter.writeEndElement();
     }
