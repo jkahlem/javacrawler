@@ -9,8 +9,10 @@ import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.EnumDeclaration;
+import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
+import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.ReturnStmt;
@@ -20,6 +22,7 @@ import com.github.javaparser.ast.type.TypeParameter;
 import com.github.javaparser.ast.visitor.GenericVisitorAdapter;
 import com.returntypes.crawler.visitor.structs.JavaCodeFile;
 import com.returntypes.crawler.visitor.structs.SimplifiedClass;
+import com.returntypes.crawler.visitor.structs.SimplifiedClassField;
 import com.returntypes.crawler.visitor.structs.SimplifiedImport;
 import com.returntypes.crawler.visitor.structs.SimplifiedMethod;
 import com.returntypes.crawler.visitor.structs.SimplifiedParameter;
@@ -186,6 +189,7 @@ public class CodeAbstractionVisitor extends GenericVisitorAdapter<JavaCodeFile, 
 
         addModifiers(classDeclaration);
         addExtendedAndImplementedTypesToCurrentClass(classDeclaration);
+        addClassFieldsToCurrentClass(classDeclaration);
         setClassTypeOfCurrentClass(classDeclaration);
         addTypeParametersToCurrentClass(classDeclaration);
 
@@ -198,7 +202,7 @@ public class CodeAbstractionVisitor extends GenericVisitorAdapter<JavaCodeFile, 
 
     public void addModifiers(ClassOrInterfaceDeclaration classDeclaration) {
         classDeclaration.getModifiers().forEach(p -> {
-            currentClass.addModifier(p.toString().stripTrailing());
+            currentClass.addModifier(p.toString().trim());
         });
     }
 
@@ -211,6 +215,23 @@ public class CodeAbstractionVisitor extends GenericVisitorAdapter<JavaCodeFile, 
         });
     }
 
+    public void addClassFieldsToCurrentClass(ClassOrInterfaceDeclaration classDeclaration) {
+        classDeclaration.getFields().forEach(field -> {
+            field.getVariables().forEach(variable -> {
+                // Field declarations can define multiple fields (-> variables), e.g.  class { private int a, b; } declares different fields
+                // (Additionally, declarations like int a, b[]; may have different types, as b will be an array.)
+                currentClass.addField(createSimplifiedClassField(variable));
+            });
+        });
+    }
+
+    public SimplifiedClassField createSimplifiedClassField(VariableDeclarator field) {
+        final SimplifiedClassField simplifiedClassField = new SimplifiedClassField();
+        simplifiedClassField.setName(field.getNameAsString());
+        simplifiedClassField.setType(createSimplifiedType(field.getType()));
+        return simplifiedClassField;
+    }
+
     public void setClassTypeOfCurrentClass(ClassOrInterfaceDeclaration classDeclaration) {
         if (classDeclaration.isInterface()) {
             currentClass.setClassType(SimplifiedClass.ClassType.INTERFACE);
@@ -220,9 +241,8 @@ public class CodeAbstractionVisitor extends GenericVisitorAdapter<JavaCodeFile, 
     }
 
     public void addTypeParametersToCurrentClass(ClassOrInterfaceDeclaration classDeclaration) {
-        classDeclaration.getTypeParameters().forEach(p -> {
-            SimplifiedTypeParameter simplifiedTypeParameter = createSimplifiedTypeParameter(p);
-            currentClass.addTypeParameter(simplifiedTypeParameter);
+        classDeclaration.getTypeParameters().forEach(typeParameter -> {
+            currentClass.addTypeParameter(createSimplifiedTypeParameter(typeParameter));
         });
     }
 

@@ -13,6 +13,7 @@ import com.returntypes.crawler.visitor.structs.AnnotationsContainer;
 import com.returntypes.crawler.visitor.structs.ClassContainer;
 import com.returntypes.crawler.visitor.structs.JavaCodeFile;
 import com.returntypes.crawler.visitor.structs.SimplifiedClass;
+import com.returntypes.crawler.visitor.structs.SimplifiedClassField;
 import com.returntypes.crawler.visitor.structs.SimplifiedImport;
 import com.returntypes.crawler.visitor.structs.SimplifiedMethod;
 import com.returntypes.crawler.visitor.structs.SimplifiedParameter;
@@ -133,6 +134,7 @@ public class JavaCodeXmlWriter {
         writeModifiers(simplifiedClass);
         writeTypeParameters(simplifiedClass);
         writeExtendedAndImplementedClassNames(simplifiedClass);
+        writeClassFields(simplifiedClass);
         writeClasses(simplifiedClass);
         writeMethods(simplifiedClass);
 
@@ -165,6 +167,32 @@ public class JavaCodeXmlWriter {
         for (String className : simplifiedClass.getExtendedAndImplementedClassNames()) {
             writeType(new SimplifiedType(className, false));
         }
+
+        outputStreamWriter.writeEndElement();
+    }
+
+    private void writeClassFields(SimplifiedClass simplifiedClass) throws XMLStreamException {
+        if (simplifiedClass.getFields().isEmpty()) {
+            return;
+        }
+
+        outputStreamWriter.writeStartElement("fields");
+
+        for (SimplifiedClassField field : simplifiedClass.getFields()) {
+            writeClassField(field);            
+        }
+
+        outputStreamWriter.writeEndElement();
+    }
+
+    private void writeClassField(SimplifiedClassField simplifiedClassField) throws XMLStreamException {
+        outputStreamWriter.writeStartElement("field");
+
+        outputStreamWriter.writeStartElement("name");
+        outputStreamWriter.writeCharacters(simplifiedClassField.getName());
+        outputStreamWriter.writeEndElement();
+
+        writeType(simplifiedClassField.getType());
 
         outputStreamWriter.writeEndElement();
     }
@@ -209,7 +237,7 @@ public class JavaCodeXmlWriter {
             outputStreamWriter.writeAttribute("isArrayType", "true");
         }
 
-        outputStreamWriter.writeCharacters(type.getName());
+        outputStreamWriter.writeCharacters(type.getMainTypeName());
         outputStreamWriter.writeEndElement();
     }
     
@@ -362,7 +390,7 @@ public class JavaCodeXmlWriter {
     private void writeException(SimplifiedType exception) throws XMLStreamException {
         outputStreamWriter.writeStartElement("exception");
 
-        outputStreamWriter.writeCharacters(exception.getName());
+        outputStreamWriter.writeCharacters(exception.getMainTypeName());
 
         outputStreamWriter.writeEndElement();
     }

@@ -16,6 +16,7 @@ public class SimplifiedClass implements ClassContainer, TypeParameterContainer {
     List<SimplifiedTypeParameter> typeParameters;
     List<String> extendsImplements;
     SimplifiedClass parent;
+    List<SimplifiedClassField> fields;
     
     public SimplifiedClass() {
         classes = new LinkedList<SimplifiedClass>();
@@ -23,6 +24,7 @@ public class SimplifiedClass implements ClassContainer, TypeParameterContainer {
         typeParameters = new LinkedList<SimplifiedTypeParameter>();
         extendsImplements = new LinkedList<String>();
         modifiers = new LinkedList<String>();
+        fields = new LinkedList<>();
     }
 
     public void setClassName(String className) {
@@ -87,5 +89,13 @@ public class SimplifiedClass implements ClassContainer, TypeParameterContainer {
 
     public SimplifiedClass getParent() {
         return parent;
+    }
+
+    public void addField(SimplifiedClassField field) {
+        fields.add(field);
+    }
+
+    public List<SimplifiedClassField> getFields() {
+        return fields;
     }
 }
