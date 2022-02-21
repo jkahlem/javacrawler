@@ -15,7 +15,7 @@ public class SimplifiedMethod implements TypeParameterContainer, AnnotationsCont
     Range returnTypeRange;
     List<SimplifiedParameter> parameters;
     List<String> modifiers;
-    List<SimplifiedType> exceptions;
+    boolean throwsErrors;
     boolean singleAssignment;
     boolean singleReturn;
 
@@ -24,7 +24,7 @@ public class SimplifiedMethod implements TypeParameterContainer, AnnotationsCont
         typeParameters = new LinkedList<SimplifiedTypeParameter>();
         parameters = new LinkedList<SimplifiedParameter>();
         modifiers = new LinkedList<>();
-        exceptions = new LinkedList<>();
+        //exceptions = new LinkedList<>();
     }
 
     public void setMethodName(String methodName) {
@@ -99,13 +99,13 @@ public class SimplifiedMethod implements TypeParameterContainer, AnnotationsCont
         return modifiers;
     }
 
-    public void addException(SimplifiedType exception) {
+    /*public void addException(SimplifiedType exception) {
         exceptions.add(exception);
     }
 
     public List<SimplifiedType> getExceptions() {
         return exceptions;
-    }
+    }*/
 
     public void setSingleAssignment(boolean singleAssignment) {
         this.singleAssignment = singleAssignment;
@@ -121,5 +121,13 @@ public class SimplifiedMethod implements TypeParameterContainer, AnnotationsCont
 
     public boolean isSingleReturn() {
         return singleReturn;
+    }
+
+    public void setThrowsErrors(boolean throwsErrors) {
+        this.throwsErrors = throwsErrors;
+    }
+
+    public boolean isThrowsErrors() {
+        return throwsErrors;
     }
 }

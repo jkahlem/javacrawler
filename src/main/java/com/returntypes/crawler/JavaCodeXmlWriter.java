@@ -262,13 +262,21 @@ public class JavaCodeXmlWriter {
         if (simplifiedMethod.isChainMethod()) {
             outputStreamWriter.writeAttribute("isChainMethod", "true");
         }
+        if (simplifiedMethod.isSingleAssignment()) {
+            outputStreamWriter.writeAttribute("isSingleAssignment", "true");
+        }
+        if (simplifiedMethod.isSingleReturn()) {
+            outputStreamWriter.writeAttribute("isSingleReturn", "true");
+        }
+        if (simplifiedMethod.isThrowsErrors()) {
+            outputStreamWriter.writeAttribute("throwsErrors", "true");
+        }
         writeMethodRanges(simplifiedMethod);
         writeAnnotations(simplifiedMethod);
         writeTypeParameters(simplifiedMethod);
         writeType(simplifiedMethod.getReturnType());
         writeParameters(simplifiedMethod.getParameters());
         writeModifiers(simplifiedMethod.getModifiers());
-        writeExceptions(simplifiedMethod.getExceptions());
 
         outputStreamWriter.writeEndElement();
     }
@@ -369,28 +377,6 @@ public class JavaCodeXmlWriter {
         outputStreamWriter.writeStartElement("modifier");
 
         outputStreamWriter.writeCharacters(modifier);
-
-        outputStreamWriter.writeEndElement();
-    }
-
-    private void writeExceptions(List<SimplifiedType> exceptions) throws XMLStreamException {
-        if (exceptions.isEmpty()) {
-            return;
-        }
-
-        outputStreamWriter.writeStartElement("exceptions");
-
-        for (SimplifiedType exception : exceptions) {
-            writeException(exception);
-        }
-
-        outputStreamWriter.writeEndElement();
-    }
-
-    private void writeException(SimplifiedType exception) throws XMLStreamException {
-        outputStreamWriter.writeStartElement("exception");
-
-        outputStreamWriter.writeCharacters(exception.getMainTypeName());
 
         outputStreamWriter.writeEndElement();
     }

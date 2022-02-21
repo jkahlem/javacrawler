@@ -95,10 +95,6 @@ public class CodeAbstractionVisitor extends GenericVisitorAdapter<JavaCodeFile, 
             simplifiedMethod.addParameter(createSimplifiedParameter(parameter));
         });
 
-        methodDeclaration.getThrownExceptions().forEach(exception -> {
-            simplifiedMethod.addException(createSimplifiedType(exception));
-        });
-
         SimplifiedType simplifiedReturnType = createSimplifiedType(methodDeclaration.getType());
         simplifiedMethod.setReturnType(simplifiedReturnType);
         
@@ -116,6 +112,7 @@ public class CodeAbstractionVisitor extends GenericVisitorAdapter<JavaCodeFile, 
         simplifiedMethod.setChainMethod(isChainMethod(methodDeclaration));
         simplifiedMethod.setSingleAssignment(isSingleAssignment(methodDeclaration));
         simplifiedMethod.setSingleReturn(isSingleReturn(methodDeclaration));
+        simplifiedMethod.setThrowsErrors(isThrowingErrors(methodDeclaration));
         return simplifiedMethod;
     }
 
@@ -191,6 +188,27 @@ public class CodeAbstractionVisitor extends GenericVisitorAdapter<JavaCodeFile, 
         return false;
     }
 
+    private boolean isThrowingErrors(MethodDeclaration methodDeclaration) {
+        if (methodDeclaration.getThrownExceptions().size() > 0) {
+            return true;
+        }
+
+        Optional<BlockStmt> blockStatement = methodDeclaration.getBody();
+        if (blockStatement.isPresent()) {
+            return containsThrowStatements(blockStatement.get());
+        }
+        return false;
+    }
+
+    private boolean containsThrowStatements(BlockStmt blockStatement) {
+        for (Statement statement : blockStatement.getStatements()) {
+            if (statement.isThrowStmt()) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
     private void setMethodRanges(MethodDeclaration methodDeclaration, SimplifiedMethod simplifiedMethod) {
         Optional<Range> methodNameRange = methodDeclaration.getName().getRange();
         if (methodNameRange.isPresent()) {
