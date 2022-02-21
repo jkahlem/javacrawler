@@ -6,6 +6,7 @@ import java.util.Optional;
 import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
+import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.EnumDeclaration;
@@ -113,6 +114,8 @@ public class CodeAbstractionVisitor extends GenericVisitorAdapter<JavaCodeFile, 
         setMethodRanges(methodDeclaration, simplifiedMethod);
 
         simplifiedMethod.setChainMethod(isChainMethod(methodDeclaration));
+        simplifiedMethod.setSingleAssignment(isSingleAssignment(methodDeclaration));
+        simplifiedMethod.setSingleReturn(isSingleReturn(methodDeclaration));
         return simplifiedMethod;
     }
 
@@ -135,6 +138,26 @@ public class CodeAbstractionVisitor extends GenericVisitorAdapter<JavaCodeFile, 
 
         if (blockStatement.isPresent()) {
             return isAllReturnValuesThis(blockStatement.get());
+        }
+        return false;
+    }
+
+    private boolean isSingleAssignment(MethodDeclaration methodDeclaration) {
+        Optional<BlockStmt> blockStatement = methodDeclaration.getBody();
+
+        if (blockStatement.isPresent()) {
+            NodeList<Statement> statements = blockStatement.get().getStatements();
+            return statements.size() == 1 && statements.get(0).isExpressionStmt() && statements.get(0).asExpressionStmt().getExpression().isAssignExpr();
+        }
+        return false;
+    }
+
+    private boolean isSingleReturn(MethodDeclaration methodDeclaration) {
+        Optional<BlockStmt> blockStatement = methodDeclaration.getBody();
+
+        if (blockStatement.isPresent()) {
+            NodeList<Statement> statements = blockStatement.get().getStatements();
+            return statements.size() == 1 && statements.get(0).isReturnStmt();
         }
         return false;
     }
