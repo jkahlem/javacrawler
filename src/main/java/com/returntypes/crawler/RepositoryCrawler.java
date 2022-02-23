@@ -60,6 +60,7 @@ public class RepositoryCrawler {
             }
         }
         this.xmlWriter.closeOutputFile();
+        this.xmlWriter = null;
     }
 
     /**

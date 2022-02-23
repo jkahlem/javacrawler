@@ -24,7 +24,6 @@ public class SimplifiedMethod implements TypeParameterContainer, AnnotationsCont
         typeParameters = new LinkedList<SimplifiedTypeParameter>();
         parameters = new LinkedList<SimplifiedParameter>();
         modifiers = new LinkedList<>();
-        //exceptions = new LinkedList<>();
     }
 
     public void setMethodName(String methodName) {
@@ -98,14 +97,6 @@ public class SimplifiedMethod implements TypeParameterContainer, AnnotationsCont
     public List<String> getModifiers() {
         return modifiers;
     }
-
-    /*public void addException(SimplifiedType exception) {
-        exceptions.add(exception);
-    }
-
-    public List<SimplifiedType> getExceptions() {
-        return exceptions;
-    }*/
 
     public void setSingleAssignment(boolean singleAssignment) {
         this.singleAssignment = singleAssignment;

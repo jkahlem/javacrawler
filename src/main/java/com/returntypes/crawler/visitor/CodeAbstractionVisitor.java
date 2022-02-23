@@ -14,9 +14,13 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.Expression;
+import com.github.javaparser.ast.nodeTypes.NodeWithBlockStmt;
+import com.github.javaparser.ast.nodeTypes.NodeWithBody;
 import com.github.javaparser.ast.stmt.BlockStmt;
+import com.github.javaparser.ast.stmt.CatchClause;
 import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.stmt.Statement;
+import com.github.javaparser.ast.stmt.TryStmt;
 import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.ast.type.TypeParameter;
 import com.github.javaparser.ast.visitor.GenericVisitorAdapter;
@@ -201,12 +205,49 @@ public class CodeAbstractionVisitor extends GenericVisitorAdapter<JavaCodeFile, 
     }
 
     private boolean containsThrowStatements(BlockStmt blockStatement) {
+        if (blockStatement == null) {
+            return false;
+        }
         for (Statement statement : blockStatement.getStatements()) {
             if (statement.isThrowStmt()) {
                 return true;
             }
+            if (statement.isTryStmt()) {
+                // Exceptions thrown in try statements do not matter, only check catch clauses which can be passed further
+                final TryStmt tryStmt = statement.asTryStmt();
+                for (CatchClause catchClause : tryStmt.getCatchClauses()) {
+                    if (containsThrowStatements(catchClause.getBody())) {
+                        return true;
+                    }
+                }
+            }
+            if (containsThrowStatements(getBlockStatement(statement))) {
+                return true;
+            }
         }
         return false;
+    }
+    
+
+    private BlockStmt getBlockStatement(Statement statement) {
+        if (statement.isBlockStmt()) {
+            return statement.asBlockStmt();
+        } else if (statement instanceof NodeWithBody) {
+            return getBlockStatementFromNodeWithBody((NodeWithBody<?>) statement);
+        } else if (statement instanceof NodeWithBlockStmt) {
+            return ((NodeWithBlockStmt<?>) statement).getBody();
+        }
+        return null;
+    }
+
+    private BlockStmt getBlockStatementFromNodeWithBody(NodeWithBody node) {
+        final Statement statement = node.getBody();
+        if (statement.isBlockStmt()) {
+            return statement.asBlockStmt();
+        }
+        final BlockStmt block = new BlockStmt();
+        block.addStatement(statement);
+        return block;
     }
     
     private void setMethodRanges(MethodDeclaration methodDeclaration, SimplifiedMethod simplifiedMethod) {
