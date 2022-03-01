@@ -5,6 +5,7 @@ public class CrawlerOptions {
     private boolean useRanges;
     private boolean forced;
     private boolean silent;
+    private Integer javaVersion;
 
     public boolean isUseAbsolutePaths() {
         return useAbsolutePaths;
@@ -20,5 +21,9 @@ public class CrawlerOptions {
 
     public boolean isSilent() {
         return silent;
+    }
+
+    public Integer getJavaVersion() {
+        return javaVersion;
     }
 }

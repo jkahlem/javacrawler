@@ -10,6 +10,7 @@ import java.util.Optional;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParseResult;
+import com.github.javaparser.ParserConfiguration.LanguageLevel;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.utils.Log;
 import com.returntypes.crawler.visitor.JavaCodeFileVisitor;
@@ -30,6 +31,42 @@ public class RepositoryCrawler {
         this.crawlerOptions = crawlerOptions;
         this.javaParser = new JavaParser();
         this.outputStream = outputStream;
+
+        if (this.crawlerOptions.getJavaVersion() != null && this.crawlerOptions.getJavaVersion() != 0) {
+            LanguageLevel languageLevel = mapJavaVersion(this.crawlerOptions.getJavaVersion());
+            if (languageLevel == null) {
+                throw new RuntimeException("The specified java version " + this.crawlerOptions.getJavaVersion() + " is not supported.");
+            }
+            this.javaParser.getParserConfiguration().setLanguageLevel(languageLevel);
+        }
+    }
+
+    private LanguageLevel mapJavaVersion(int javaVersion) {
+        switch (javaVersion) {
+            case 7:
+                return LanguageLevel.JAVA_7;
+            case 8:
+                return LanguageLevel.JAVA_8;
+            case 9:
+                return LanguageLevel.JAVA_9;
+            case 10:
+                return LanguageLevel.JAVA_10;
+            case 11:
+                return LanguageLevel.JAVA_11;
+            case 12:
+                return LanguageLevel.JAVA_12;
+            case 13:
+                return LanguageLevel.JAVA_13;
+            case 14:
+                return LanguageLevel.JAVA_14;
+            case 15:
+                return LanguageLevel.JAVA_15;
+            case 16:
+                return LanguageLevel.JAVA_16;
+            case 17:
+                return LanguageLevel.JAVA_17;
+        }
+        return null;
     }
 
     /**

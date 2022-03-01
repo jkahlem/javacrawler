@@ -240,7 +240,7 @@ public class CodeAbstractionVisitor extends GenericVisitorAdapter<JavaCodeFile, 
         return null;
     }
 
-    private BlockStmt getBlockStatementFromNodeWithBody(NodeWithBody node) {
+    private BlockStmt getBlockStatementFromNodeWithBody(NodeWithBody<?> node) {
         final Statement statement = node.getBody();
         if (statement.isBlockStmt()) {
             return statement.asBlockStmt();
