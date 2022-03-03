@@ -6,6 +6,7 @@ import java.util.Optional;
 import com.github.javaparser.Range;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
+import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -14,12 +15,11 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.Parameter;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.Expression;
-import com.github.javaparser.ast.nodeTypes.NodeWithBlockStmt;
-import com.github.javaparser.ast.nodeTypes.NodeWithBody;
 import com.github.javaparser.ast.stmt.BlockStmt;
 import com.github.javaparser.ast.stmt.CatchClause;
 import com.github.javaparser.ast.stmt.ReturnStmt;
 import com.github.javaparser.ast.stmt.Statement;
+import com.github.javaparser.ast.stmt.ThrowStmt;
 import com.github.javaparser.ast.stmt.TryStmt;
 import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.ast.type.TypeParameter;
@@ -204,50 +204,29 @@ public class CodeAbstractionVisitor extends GenericVisitorAdapter<JavaCodeFile, 
         return false;
     }
 
-    private boolean containsThrowStatements(BlockStmt blockStatement) {
-        if (blockStatement == null) {
+    private boolean containsThrowStatements(Node node) {
+        if (node == null) {
             return false;
-        }
-        for (Statement statement : blockStatement.getStatements()) {
-            if (statement.isThrowStmt()) {
-                return true;
-            }
-            if (statement.isTryStmt()) {
-                // Exceptions thrown in try statements do not matter, only check catch clauses which can be passed further
-                final TryStmt tryStmt = statement.asTryStmt();
-                for (CatchClause catchClause : tryStmt.getCatchClauses()) {
-                    if (containsThrowStatements(catchClause.getBody())) {
-                        return true;
-                    }
+        } else if (node instanceof TryStmt) {
+            // For try statements: only look into catch/finally blocks.
+            // (Actually, uncatched exceptions of try blocks might still be thrown outside, but this is a rather rare case/currently not completely trackable.)
+            final TryStmt tryStmt = (TryStmt) node;
+            for (CatchClause catchClause : tryStmt.getCatchClauses()) {
+                if (containsThrowStatements(catchClause.getBody())) {
+                    return true;
                 }
             }
-            if (containsThrowStatements(getBlockStatement(statement))) {
-                return true;
+            return containsThrowStatements(tryStmt.getFinallyBlock().orElse(null));
+        } else if (node instanceof ThrowStmt) {
+            return true;
+        } else {
+            for (Node childNode: node.getChildNodes()) {
+                if (containsThrowStatements(childNode)) {
+                    return true;
+                }
             }
         }
         return false;
-    }
-    
-
-    private BlockStmt getBlockStatement(Statement statement) {
-        if (statement.isBlockStmt()) {
-            return statement.asBlockStmt();
-        } else if (statement instanceof NodeWithBody) {
-            return getBlockStatementFromNodeWithBody((NodeWithBody<?>) statement);
-        } else if (statement instanceof NodeWithBlockStmt) {
-            return ((NodeWithBlockStmt<?>) statement).getBody();
-        }
-        return null;
-    }
-
-    private BlockStmt getBlockStatementFromNodeWithBody(NodeWithBody<?> node) {
-        final Statement statement = node.getBody();
-        if (statement.isBlockStmt()) {
-            return statement.asBlockStmt();
-        }
-        final BlockStmt block = new BlockStmt();
-        block.addStatement(statement);
-        return block;
     }
     
     private void setMethodRanges(MethodDeclaration methodDeclaration, SimplifiedMethod simplifiedMethod) {
