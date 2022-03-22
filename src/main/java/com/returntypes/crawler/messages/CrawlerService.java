@@ -15,6 +15,7 @@ public interface CrawlerService {
      * @throws Exception
      */
     public String getFileContent(@JsonRpcParam("path") String path, @JsonRpcParam("options") CrawlerOptions options) throws Exception;
+
     /**
      * Crawls and converts the content of all java files in the specified path
      * 
@@ -24,4 +25,14 @@ public interface CrawlerService {
      * @throws Exception
      */
     public String getDirectoryContents(@JsonRpcParam("path") String path, @JsonRpcParam("options") CrawlerOptions options) throws Exception;
+
+    /**
+     * Parses the passed source code
+     * 
+     * @param code the raw source code to parse
+     * @param options the crawler options
+     * @return the contents of the passed source code in xml
+     * @throws Exception
+     */
+    public String parseSourceCode(@JsonRpcParam("code") String code, @JsonRpcParam("options") CrawlerOptions options) throws Exception;
 }

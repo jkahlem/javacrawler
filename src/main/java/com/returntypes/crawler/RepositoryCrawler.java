@@ -101,6 +101,19 @@ public class RepositoryCrawler {
     }
 
     /**
+     * Parses the source code and outputs it to the given output stream.
+     * 
+     * @param sourceCode the java source code to parse
+     * @throws Exception
+     */
+    public void parseSourceCode(String sourceCode) throws Exception {
+        this.xmlWriter = new JavaCodeXmlWriter(this.outputStream, this.crawlerOptions);
+        extractJavaCode(getCompilationUnit(sourceCode), "");
+        this.xmlWriter.closeOutputFile();
+        this.xmlWriter = null;
+    }
+
+    /**
      * Logs the message if not in silent mode
      * 
      * @param msg
@@ -152,8 +165,19 @@ public class RepositoryCrawler {
         if (!crawlerOptions.isUseAbsolutePaths() && rootPath.getParent() != null) {
             path = rootPath.getParent().relativize(filePath);
         }
-        JavaCodeFile javaCodeFile = compilationUnit.accept(new CodeAbstractionVisitor(path.toString()), null);
+        extractJavaCode(compilationUnit, path.toString());
+    }
 
+    /**
+     * Extracts java code from a compilation unit
+     * 
+     * @param compilationUnit
+     * @param path
+     * @throws Exception
+     */
+    private void extractJavaCode(CompilationUnit compilationUnit, String path) throws Exception {
+        if (compilationUnit == null) return;
+        JavaCodeFile javaCodeFile = compilationUnit.accept(new CodeAbstractionVisitor(path), null);
         this.xmlWriter.writeJavaCodeFile(javaCodeFile);
     }
 
@@ -165,7 +189,21 @@ public class RepositoryCrawler {
      * @throws Exception
      */
     private CompilationUnit getCompilationUnit(Path filePath) throws Exception {
-        ParseResult<CompilationUnit> parseResult = javaParser.parse(filePath.toFile());
+        return getCompilationUnit(javaParser.parse(filePath.toFile()));
+    }
+
+    /**
+     * Returns the compilation unit for java source code
+     * 
+     * @param sourceCode
+     * @return
+     * @throws Exception
+     */
+    private CompilationUnit getCompilationUnit(String sourceCode) throws Exception {
+        return getCompilationUnit(javaParser.parse(sourceCode));
+    }
+
+    private CompilationUnit getCompilationUnit(ParseResult<CompilationUnit> parseResult) throws Exception {
         if (!parseResult.isSuccessful()) {
             throw new ParsingException(parseResult);
         }
