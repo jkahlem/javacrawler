@@ -108,7 +108,16 @@ public class RepositoryCrawler {
      */
     public void parseSourceCode(String sourceCode) throws Exception {
         this.xmlWriter = new JavaCodeXmlWriter(this.outputStream, this.crawlerOptions);
-        extractJavaCode(getCompilationUnit(sourceCode), "");
+        try {
+            extractJavaCode(getCompilationUnit(sourceCode), "");
+        } catch(Exception e) {
+            if (!this.crawlerOptions.isForced()) {
+                this.xmlWriter.closeOutputFile();
+                throw e;
+            } else {
+                Log.error(e);
+            }
+        }
         this.xmlWriter.closeOutputFile();
         this.xmlWriter = null;
     }

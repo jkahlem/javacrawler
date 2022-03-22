@@ -6,7 +6,6 @@ import java.nio.file.FileSystems;
 import com.returntypes.crawler.RepositoryCrawler;
 
 public class CrawlerServiceImpl implements CrawlerService {
-    @Override
     public String getFileContent(String path, CrawlerOptions options) throws Exception{
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         RepositoryCrawler repositoryCrawler = new RepositoryCrawler(outputStream, options);
@@ -14,7 +13,6 @@ public class CrawlerServiceImpl implements CrawlerService {
         return outputStream.toString();
     }
 
-    @Override
     public String getDirectoryContents(String path, CrawlerOptions options) throws Exception{
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         RepositoryCrawler repositoryCrawler = new RepositoryCrawler(outputStream, options);
@@ -22,7 +20,6 @@ public class CrawlerServiceImpl implements CrawlerService {
         return outputStream.toString();
     }
 
-    @Override
     public String parseSourceCode(String code, CrawlerOptions options) throws Exception {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         RepositoryCrawler repositoryCrawler = new RepositoryCrawler(outputStream, options);
