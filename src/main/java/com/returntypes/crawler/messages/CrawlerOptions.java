@@ -6,6 +6,7 @@ public class CrawlerOptions {
     private boolean forced;
     private boolean silent;
     private Integer javaVersion;
+    private boolean parseIncomplete;
 
     public boolean isUseAbsolutePaths() {
         return useAbsolutePaths;
@@ -25,5 +26,9 @@ public class CrawlerOptions {
 
     public Integer getJavaVersion() {
         return javaVersion;
+    }
+
+    public boolean isParseIncomplete() {
+        return parseIncomplete;
     }
 }

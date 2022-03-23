@@ -47,25 +47,13 @@ public class JavaCodeXmlWriter {
     }
 
     public void closeOutputFile() throws XMLStreamException {
-        if (fileListOpened) {
-            writeFileListEnd();
-        }
-        writeDocumentEnd();
+        outputStreamWriter.writeEndDocument();
         outputStreamWriter.close();
     }
 
     private void writeFileListStart() throws XMLStreamException {
         outputStreamWriter.writeStartElement("files");
         fileListOpened = true;
-    }
-
-    private void writeFileListEnd() throws XMLStreamException {
-        outputStreamWriter.writeEndElement();
-    }
-
-    private void writeDocumentEnd() throws XMLStreamException {
-        outputStreamWriter.writeEndElement(); // </root>
-        outputStreamWriter.writeEndDocument();
     }
 
     public void writeJavaCodeFile(JavaCodeFile javaCodeFile) throws XMLStreamException {

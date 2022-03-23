@@ -111,12 +111,7 @@ public class RepositoryCrawler {
         try {
             extractJavaCode(getCompilationUnit(sourceCode), "");
         } catch(Exception e) {
-            if (!this.crawlerOptions.isForced()) {
-                this.xmlWriter.closeOutputFile();
-                throw e;
-            } else {
-                Log.error(e);
-            }
+            Log.error(e);
         }
         this.xmlWriter.closeOutputFile();
         this.xmlWriter = null;
@@ -213,14 +208,9 @@ public class RepositoryCrawler {
     }
 
     private CompilationUnit getCompilationUnit(ParseResult<CompilationUnit> parseResult) throws Exception {
-        if (!parseResult.isSuccessful()) {
+        if (!parseResult.isSuccessful() && !this.crawlerOptions.isParseIncomplete()) {
             throw new ParsingException(parseResult);
         }
-
-        Optional<CompilationUnit> optionalCompilationUnit = parseResult.getResult();
-        if (optionalCompilationUnit.isPresent()) {
-            return optionalCompilationUnit.get();
-        }
-        return null;
+        return parseResult.getResult().orElse(null);
     }
 }
