@@ -71,6 +71,9 @@ public class JavaCodeXmlWriter {
     }
 
     private void writePackage(JavaCodeFile javaCodeFile) throws XMLStreamException {
+        if (javaCodeFile.getPackage() == null) {
+            return;
+        }
         outputStreamWriter.writeStartElement("package");
         outputStreamWriter.writeCharacters(javaCodeFile.getPackage());
         outputStreamWriter.writeEndElement();
