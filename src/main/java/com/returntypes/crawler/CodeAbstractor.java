@@ -11,6 +11,7 @@ public class CodeAbstractor {
         try {
             CrawlerService crawlerService = new CrawlerServiceImpl();
             JsonRpcServer rpcServer = new JsonRpcServer(crawlerService, CrawlerService.class);
+            rpcServer.setErrorResolver(new RpcErrorResolver());
             while (true) {
                 rpcServer.handleRequest(System.in, System.out);
             }
