@@ -7,16 +7,19 @@ import com.googlecode.jsonrpc4j.JsonRpcParam;
  */
 public interface MainApplicationService {
     /**
-     * Logs the passed message
+     * Reports the progress of the crawling service
      * 
-     * @param string the log message
+     * @param progress the progress value relative to total
+     * @param total the total value
+     * @param operation the current operation
      */
-    public void log(@JsonRpcParam("message") String string);
-    
+    public void reportProgress(@JsonRpcParam("progress") int progress, @JsonRpcParam("total") int total, @JsonRpcParam("operation") String operation);
+
     /**
-     * Logs the passed message as an error
+     * Reports an error happened during the crawling process (like parser exceptions) which were skipped
      * 
-     * @param string the error message
+     * @param message the error message
+     * @param filePath the path to the file which was processed when the error occured
      */
-    public void error(@JsonRpcParam("message") String string);
+    public void reportError(@JsonRpcParam("message") String message, @JsonRpcParam("stacktrace") String stacktrace, @JsonRpcParam("filepath") String filePath);
 }

@@ -3,18 +3,19 @@ package com.returntypes.crawler;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.LinkedList;
-import java.util.Optional;
 
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParseResult;
 import com.github.javaparser.ParserConfiguration.LanguageLevel;
 import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.utils.Log;
 import com.returntypes.crawler.visitor.JavaCodeFileVisitor;
 import com.returntypes.crawler.messages.CrawlerOptions;
+import com.returntypes.crawler.messages.MainApplicationService;
 import com.returntypes.crawler.visitor.CodeAbstractionVisitor;
 import com.returntypes.crawler.visitor.structs.JavaCodeFile;
 
@@ -22,15 +23,20 @@ import com.returntypes.crawler.visitor.structs.JavaCodeFile;
  * Converts the contents of a directory to xml format
  */
 public class RepositoryCrawler {
+    final MainApplicationService mainApplicationService;
+
     JavaCodeXmlWriter xmlWriter;
     JavaParser javaParser;    
     CrawlerOptions crawlerOptions;
     OutputStream outputStream;
 
-    public RepositoryCrawler(OutputStream outputStream, CrawlerOptions crawlerOptions) {
+    public RepositoryCrawler(final MainApplicationService mainApplicationService,
+                             final OutputStream outputStream,
+                             final CrawlerOptions crawlerOptions) {
         this.crawlerOptions = crawlerOptions;
         this.javaParser = new JavaParser();
         this.outputStream = outputStream;
+        this.mainApplicationService = mainApplicationService;
 
         if (this.crawlerOptions.getJavaVersion() != null && this.crawlerOptions.getJavaVersion() != 0) {
             LanguageLevel languageLevel = mapJavaVersion(this.crawlerOptions.getJavaVersion());
@@ -82,8 +88,7 @@ public class RepositoryCrawler {
 
         int counter = 0;
         for (Path filePath : javaFiles) {
-            counter++;
-            log("["+ counter + "/" + javaFiles.size() + "] Extract " + filePath.toString());
+            reportProgress(counter++, javaFiles.size(), "Extract " + filePath.toString());
             try {
                 extractJavaCodeFileContents(rootPath, filePath);
             } catch(Exception e) {
@@ -91,8 +96,7 @@ public class RepositoryCrawler {
                     this.xmlWriter.closeOutputFile();
                     throw e;
                 } else {
-                    log("Could not parse the file, skip it.");
-                    Log.error(e);
+                    reportError(e, filePath.toString());
                 }
             }
         }
@@ -111,20 +115,27 @@ public class RepositoryCrawler {
         try {
             extractJavaCode(getCompilationUnit(sourceCode), "");
         } catch(Exception e) {
-            Log.error(e);
+            reportError(e, "<no file path>");
         }
         this.xmlWriter.closeOutputFile();
         this.xmlWriter = null;
     }
 
-    /**
-     * Logs the message if not in silent mode
-     * 
-     * @param msg
-     */
-    private void log(String msg) {
+    private void reportProgress(int progress, int total, String operation) {
         if (!this.crawlerOptions.isSilent())
-            Log.info(msg);
+            mainApplicationService.reportProgress(progress, total, operation);
+    }
+
+    private void reportError(Throwable error, String filePath) {
+        if (!this.crawlerOptions.isSilent())
+            mainApplicationService.reportError(error.getMessage(), getStackTrace(error), filePath);
+    }
+
+    private String getStackTrace(Throwable throwable) {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        throwable.printStackTrace(pw);
+        return sw.toString();
     }
 
     /**
@@ -147,10 +158,9 @@ public class RepositoryCrawler {
             return list;
         }
 
-        log("Count java files in directory: " + path.toString());
+        reportProgress(0, 0, "Count java files in " + path.toString());
         JavaCodeFileVisitor visitor = new JavaCodeFileVisitor();
         Files.walkFileTree(path, visitor);
-        log("Found " + visitor.getFilePaths().size() + " Java Source Code files in the target directory.");
         return visitor.getFilePaths();
     }
 
