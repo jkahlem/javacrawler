@@ -88,7 +88,7 @@ public class RepositoryCrawler {
 
         int counter = 0;
         for (Path filePath : javaFiles) {
-            reportProgress(counter++, javaFiles.size(), "Extract " + filePath.toString());
+            reportProgress(counter++, javaFiles.size(), "Preprocess files");
             try {
                 extractJavaCodeFileContents(rootPath, filePath);
             } catch(Exception e) {
@@ -158,7 +158,7 @@ public class RepositoryCrawler {
             return list;
         }
 
-        reportProgress(0, 0, "Count java files in " + path.toString());
+        reportProgress(0, 0, "Count java files");
         JavaCodeFileVisitor visitor = new JavaCodeFileVisitor();
         Files.walkFileTree(path, visitor);
         return visitor.getFilePaths();
